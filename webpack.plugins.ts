@@ -1,4 +1,4 @@
-import relocateLoader from '@vercel/webpack-asset-relocator-loader'
+import relocateLoader from '@vercel/webpack-asset-relocator-loader';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 export const plugins = [

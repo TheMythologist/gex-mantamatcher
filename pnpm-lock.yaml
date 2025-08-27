@@ -96,6 +96,9 @@ importers:
       node-loader:
         specifier: ^2.1.0
         version: 2.1.0(webpack@5.101.3)
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
       style-loader:
         specifier: ^3.3.4
         version: 3.3.4(webpack@5.101.3)

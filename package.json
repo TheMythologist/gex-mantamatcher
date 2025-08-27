@@ -19,8 +19,10 @@
   "license": "MIT",
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@tailwindcss/oxide",
       "electron",
-      "electron-winstaller"
+      "electron-winstaller",
+      "sqlite3"
     ]
   },
   "dependencies": {
@@ -55,6 +57,7 @@
     "eslint-plugin-import": "^2.32.0",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
     "node-loader": "^2.1.0",
+    "prettier": "^3.6.2",
     "style-loader": "^3.3.4",
     "tailwindcss": "^4.1.12",
     "ts-loader": "^9.5.4",
