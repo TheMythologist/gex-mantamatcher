@@ -1,25 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 
-const { ipcRenderer } = window.require('electron');
-
 function Homepage() {
-  const [status, setStatus] = useState<'online' | 'offline' | 'Checking...'>('Checking...');
-  const [log, setLog] = useState('');
-
-  ipcRenderer.on('sync-status', (event, msg) => {
-    setLog(log => `${log}\n${msg}`);
-  });
-
   useEffect(() => {
     function updateOnlineStatus() {
-      const status = navigator.onLine ? 'online' : 'offline';
-      setStatus(status);
-      ipcRenderer.send('online-status-changed', status);
+      window.electron.ipcRenderer.send(
+        'online-status-changed',
+        navigator.onLine ? 'Online' : 'Offline',
+      );
     }
 
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
+
+    updateOnlineStatus();
+
     return () => {
       window.removeEventListener('online', updateOnlineStatus);
       window.removeEventListener('offline', updateOnlineStatus);
@@ -29,19 +24,18 @@ function Homepage() {
   return (
     <div>
       <p>
-        Status: <span id="status">{status}</span>
+        Status: <span id="status">{navigator.onLine ? 'Online' : 'Offline'}</span>
       </p>
       <h1 className="font-bold text-2xl underline text-red-700">Hello react in electron</h1>
       <h1>Homepage</h1>
       <button
         onClick={() => {
           const row = ['LocalRow', new Date().toISOString()];
-          ipcRenderer.send('add-local-row', row);
+          window.electron.ipcRenderer.send('add-local-row', row);
         }}
       >
         Add Local Row
       </button>
-      {log}
     </div>
   );
 }
