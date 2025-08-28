@@ -39,6 +39,7 @@ const createWindow = (): void => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Sync immediately, then every 5 min
+  sync(mainWindow);
   setInterval(() => sync(mainWindow), 5 * 60 * 1000);
 };
 

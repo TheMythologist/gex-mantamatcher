@@ -1,10 +1,15 @@
 import type { BrowserWindow } from 'electron';
 import { google } from 'googleapis';
+import path from 'path';
 import type { Database } from 'sqlite3';
 
 const SHEET_ID = '1yUPPdRQj_c0ugSIqowFX90mZnQN32gX7Z6y6nYIUrlY';
 const RANGE = 'Mantas (NLP)!A5:AT';
-const SERVICE_ACCOUNT_KEY_FILE = 'service-account.json';
+
+const SERVICE_ACCOUNT_KEY_FILE =
+  process.env.NODE_ENV === 'development'
+    ? 'service-account.json'
+    : path.join(process.resourcesPath, 'service-account.json');
 
 function getSheetsClient() {
   const auth = new google.auth.GoogleAuth({
@@ -34,11 +39,13 @@ export async function pullFromSheets(win: BrowserWindow, db: Database) {
   win.webContents.send('sync-status', 'Pulled ' + rows.length + ' rows');
 }
 
+type dbRow = { id: string; data: string; source: string };
+
 export async function pushToSheets(win: BrowserWindow, db: Database) {
   const sheets = getSheetsClient();
 
   return new Promise<void>((resolve, reject) => {
-    db.all("SELECT * FROM rows WHERE source = 'local'", async (err, rows) => {
+    db.all<dbRow>("SELECT * FROM rows WHERE source = 'local'", async (err, rows) => {
       if (err) return reject(err);
       if (rows.length === 0) return resolve();
 
