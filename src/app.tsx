@@ -4,8 +4,10 @@ import useIpcRenderer from './hooks/useIpcRenderer';
 import type { Manta } from './manta';
 
 function Homepage() {
+  const [render, setRender] = useState(0);
   const [mantaRows, setMantaRows] = useState<Manta[]>([]);
-  const syncStatusCallback = useCallback((...args: unknown[]) => console.log('hello', ...args), []);
+  const syncStatusCallback = useCallback(() => setRender(render => render + 1), []);
+
   useIpcRenderer('sync-status', syncStatusCallback);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ function Homepage() {
 
   useEffect(() => {
     window.electron.db.getMantas().then(setMantaRows);
-  }, []);
+  }, [render]);
 
   const omitColumns = ['fullRow', 'source'];
   const headers = mantaRows[0]
@@ -57,9 +59,10 @@ function Homepage() {
           <tbody>
             {mantaRows.map(manta => (
               <tr key={manta.id}>
-                {headers.map(key => (
+                {headers.map((key, index) => (
                   <td key={key} className="border border-gray-300 px-2 py-1">
                     {manta[key]}
+                    {index === 0 && <img src={`static://images/${manta.id}.jpg`} />}
                   </td>
                 ))}
               </tr>

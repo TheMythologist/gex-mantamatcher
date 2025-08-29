@@ -1,4 +1,6 @@
-import { app, ipcMain, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, net, protocol } from 'electron';
+import path from 'path';
+import url from 'url';
 
 import db, { getManta, getMantas } from './db';
 import { pullFromSheets, pushToSheets } from './gsheets';
@@ -54,11 +56,26 @@ app.whenReady().then(() => {
   ipcMain.on('add-local-row', (event, rowData) => {
     const id = 'local-' + Date.now();
     const data = JSON.stringify(rowData);
-    db.run('INSERT INTO rows (id, data, source) VALUES (?, ?, ?)', [id, data, 'local']);
+    db.run('INSERT INTO mantas (id, data, source) VALUES (?, ?, ?)', [id, data, 'local']);
   });
 
   ipcMain.handle('db-getManta', (event, id: string) => getManta(id));
   ipcMain.handle('db-getMantas', getMantas);
+
+  protocol.handle('static', request => {
+    const filePath = request.url.slice('static://'.length);
+    return net.fetch(
+      url
+        .pathToFileURL(
+          path.join(
+            process.env.NODE_ENV === 'development' ? '' : app.getPath('userData'),
+            'assets',
+            filePath,
+          ),
+        )
+        .toString(),
+    );
+  });
 
   createWindow();
 });

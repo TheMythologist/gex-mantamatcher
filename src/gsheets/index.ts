@@ -95,7 +95,7 @@ export async function pushToSheets(win: BrowserWindow, db: Database) {
   const sheets = getSheetsClient();
 
   return new Promise<void>((resolve, reject) => {
-    db.all<dbRow>("SELECT * FROM rows WHERE source = 'local'", async (err, rows) => {
+    db.all<dbRow>("SELECT * FROM mantas WHERE source = 'local'", async (err, rows) => {
       if (err) return reject(err);
       if (rows.length === 0) return resolve();
 
@@ -109,7 +109,7 @@ export async function pushToSheets(win: BrowserWindow, db: Database) {
         });
 
         // mark rows as synced
-        const stmt = db.prepare("UPDATE rows SET source = 'remote' WHERE id = ?");
+        const stmt = db.prepare("UPDATE mantas SET source = 'remote' WHERE id = ?");
         rows.forEach(r => stmt.run(r.id));
         stmt.finalize();
 
