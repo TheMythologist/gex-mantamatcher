@@ -1,3 +1,4 @@
+import type { IpcRendererEvent } from 'electron';
 import { useCallback, useEffect, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import useIpcRenderer from './hooks/useIpcRenderer';
@@ -6,9 +7,11 @@ import type { Manta } from './manta';
 function Homepage() {
   const [render, setRender] = useState(0);
   const [mantaRows, setMantaRows] = useState<Manta[]>([]);
-  const syncStatusCallback = useCallback(() => setRender(render => render + 1), []);
+  const syncStatusCallback = useCallback(() => {
+    setRender(a => a + 1);
+  }, [setRender]);
 
-  useIpcRenderer('sync-status', syncStatusCallback);
+  useIpcRenderer('sync-complete', syncStatusCallback);
 
   useEffect(() => {
     function updateOnlineStatus() {
@@ -30,7 +33,11 @@ function Homepage() {
   }, []);
 
   useEffect(() => {
-    window.electron.db.getMantas().then(setMantaRows);
+    // `setTimeout` ensures that the inserted data has been committed
+    // to the database before getting the new data
+    setTimeout(() => {
+      window.electron.db.getMantas().then(setMantaRows);
+    }, 1000);
   }, [render]);
 
   const omitColumns = ['fullRow', 'source'];

@@ -1,7 +1,8 @@
 import type { BrowserWindow } from 'electron';
 import { google } from 'googleapis';
 import path from 'path';
-import type { Database } from 'sqlite3';
+import type { Database } from 'better-sqlite3';
+import type { Manta } from '../manta';
 
 const SHEET_ID = '1yUPPdRQj_c0ugSIqowFX90mZnQN32gX7Z6y6nYIUrlY';
 const RANGE = 'Mantas (NLP)!A5:AT';
@@ -31,6 +32,27 @@ export async function pullFromSheets(win: BrowserWindow, db: Database) {
   const rows: string[][] = res.data.values || [];
   if (rows.length === 0) return;
 
+  const stmt = db.prepare<string[]>(`INSERT INTO mantas (
+    id, species, sex, pigmentation, notes,
+    hasCephalicFinInjury, hasBentPectoralOrTruncationInjury,
+    hasFishingLineInjury, ibDots, pattern,
+    injury, fullRow, source
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ON CONFLICT(id) DO UPDATE SET
+    species = excluded.species,
+    sex = excluded.sex,
+    pigmentation = excluded.pigmentation,
+    notes = excluded.notes,
+    hasCephalicFinInjury = excluded.hasCephalicFinInjury,
+    hasBentPectoralOrTruncationInjury = excluded.hasBentPectoralOrTruncationInjury,
+    hasFishingLineInjury = excluded.hasFishingLineInjury,
+    ibDots = excluded.ibDots,
+    pattern = excluded.pattern,
+    injury = excluded.injury,
+    fullRow = excluded.fullRow,
+    source = excluded.source;`);
+
   rows.forEach(row => {
     const id = row[0];
     const species = row[4];
@@ -44,80 +66,44 @@ export async function pullFromSheets(win: BrowserWindow, db: Database) {
     const pattern = row[29];
     const injury = row[30];
     const data = JSON.stringify(row);
-    db.run(
-      `INSERT INTO mantas (
-        id, species, sex, pigmentation, notes,
-        hasCephalicFinInjury, hasBentPectoralOrTruncationInjury,
-        hasFishingLineInjury, ibDots, pattern,
-        injury, fullRow, source
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        species = excluded.species,
-        sex = excluded.sex,
-        pigmentation = excluded.pigmentation,
-        notes = excluded.notes,
-        hasCephalicFinInjury = excluded.hasCephalicFinInjury,
-        hasBentPectoralOrTruncationInjury = excluded.hasBentPectoralOrTruncationInjury,
-        hasFishingLineInjury = excluded.hasFishingLineInjury,
-        ibDots = excluded.ibDots,
-        pattern = excluded.pattern,
-        injury = excluded.injury,
-        fullRow = excluded.fullRow,
-        source = excluded.source;`,
-      [
-        id,
-        species,
-        sex,
-        pigmentation,
-        notes,
-        hasCephalicFinInjury,
-        hasBentPectoralOrTruncationInjury,
-        hasFishingLineInjury,
-        ibDots,
-        pattern,
-        injury,
-        data,
-        'remote',
-      ],
-      error => {
-        if (error) console.log('Error upserting', error);
-      },
+
+    stmt.run(
+      id,
+      species,
+      sex,
+      pigmentation,
+      notes,
+      hasCephalicFinInjury,
+      hasBentPectoralOrTruncationInjury,
+      hasFishingLineInjury,
+      ibDots,
+      pattern,
+      injury,
+      data,
+      'remote',
     );
   });
 
-  win.webContents.send('sync-status', 'Pulled ' + rows.length + ' rows');
+  win.webContents.send('sync-status', `Pulled ${rows.length} rows`);
 }
-
-type dbRow = { id: string; data: string; source: string };
 
 export async function pushToSheets(win: BrowserWindow, db: Database) {
   const sheets = getSheetsClient();
 
-  return new Promise<void>((resolve, reject) => {
-    db.all<dbRow>("SELECT * FROM mantas WHERE source = 'local'", async (err, rows) => {
-      if (err) return reject(err);
-      if (rows.length === 0) return resolve();
+  const stmt = db.prepare<string[], Manta>("SELECT * FROM mantas WHERE source = 'local'");
+  const rows = stmt.all();
 
-      const values = rows.map(r => JSON.parse(r.data));
-      try {
-        await sheets.spreadsheets.values.append({
-          spreadsheetId: SHEET_ID,
-          range: RANGE,
-          valueInputOption: 'RAW',
-          requestBody: { values },
-        });
-
-        // mark rows as synced
-        const stmt = db.prepare("UPDATE mantas SET source = 'remote' WHERE id = ?");
-        rows.forEach(r => stmt.run(r.id));
-        stmt.finalize();
-
-        win.webContents.send('sync-status', 'Pushed ' + rows.length + ' rows');
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
+  const values = rows.map(r => JSON.parse(r.data));
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: RANGE,
+    valueInputOption: 'RAW',
+    requestBody: { values },
   });
+
+  // mark rows as synced
+  const stmt2 = db.prepare("UPDATE mantas SET source = 'remote' WHERE id = ?");
+  rows.forEach(r => stmt2.run(r.id));
+
+  win.webContents.send('sync-status', `Pushed ${rows.length} rows`);
 }

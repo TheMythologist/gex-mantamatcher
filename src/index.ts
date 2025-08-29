@@ -39,6 +39,7 @@ const createWindow = (): void => {
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  mainWindow.webContents.openDevTools()
 
   // Sync immediately, then every 5 min
   sync(mainWindow);
@@ -49,14 +50,17 @@ const createWindow = (): void => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  ipcMain.on('online-status-changed', (event, status) => {
+  ipcMain.handle('online-status-changed', (event, status) => {
     if (status === 'online') sync(mainWindow);
   });
 
-  ipcMain.on('add-local-row', (event, rowData) => {
+  ipcMain.handle('add-local-row', (event, rowData) => {
     const id = 'local-' + Date.now();
     const data = JSON.stringify(rowData);
-    db.run('INSERT INTO mantas (id, data, source) VALUES (?, ?, ?)', [id, data, 'local']);
+
+    // TODO: Bogus data
+    const stmt = db.prepare('INSERT INTO mantas (id, data, source) VALUES (?, ?, ?)');
+    stmt.run(id, data, 'local');
   });
 
   ipcMain.handle('db-getManta', (event, id: string) => getManta(id));

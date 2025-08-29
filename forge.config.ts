@@ -36,7 +36,7 @@ const config: ForgeConfig = {
         ],
       },
       devContentSecurityPolicy:
-        "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:; img-src 'self' 'unsafe-inline' static:",
+        "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-eval' data:; img-src 'self' static:",
     }),
     // Fuses are used to enable/disable various Electron functionality
     // at package time, before code signing the application

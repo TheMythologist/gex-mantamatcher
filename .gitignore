@@ -92,5 +92,5 @@ typings/
 out/
 
 /service-account.json
-/localdata.db
+/localdata.db*
 /assets
