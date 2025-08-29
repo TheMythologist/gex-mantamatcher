@@ -5,10 +5,17 @@ const electronHandler = {
     send(channel: string, ...args: unknown[]) {
       ipcRenderer.send(channel, args);
     },
-    on(channel: string, func: (...args: unknown[]) => void) {
-      const subscription = (_event: IpcRendererEvent, ...args: unknown[]) => func(...args);
-      ipcRenderer.on(channel, subscription);
+    once(channel: string, listener: (event: IpcRendererEvent, ...args: unknown[]) => void) {
+      ipcRenderer.once(channel, listener);
     },
+    off(channel: string, listener: (event: IpcRendererEvent, ...args: unknown[]) => void) {
+      ipcRenderer.off(channel, listener);
+    },
+  },
+
+  db: {
+    getManta: (id: string) => ipcRenderer.invoke('db-getManta', id),
+    getMantas: () => ipcRenderer.invoke('db-getMantas'),
   },
 };
 

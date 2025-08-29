@@ -24,16 +24,66 @@ export async function pullFromSheets(win: BrowserWindow, db: Database) {
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
     range: RANGE,
-    valueRenderOption: 'FORMULA',
   });
 
-  const rows = res.data.values || [];
+  if (!res.ok) return;
+
+  const rows: string[][] = res.data.values || [];
   if (rows.length === 0) return;
 
-  rows.forEach((row, i) => {
-    const id = String(i + 1); // use row number as ID
+  rows.forEach(row => {
+    const id = row[0];
+    const species = row[4];
+    const sex = row[5];
+    const pigmentation = row[6];
+    const notes = row[22];
+    const hasCephalicFinInjury = row[23];
+    const hasBentPectoralOrTruncationInjury = row[24];
+    const hasFishingLineInjury = row[25];
+    const ibDots = row[28];
+    const pattern = row[29];
+    const injury = row[30];
     const data = JSON.stringify(row);
-    db.run('INSERT OR IGNORE INTO rows (id, data, source) VALUES (?, ?, ?)', [id, data, 'remote']);
+    db.run(
+      `INSERT INTO mantas (
+        id, species, sex, pigmentation, notes,
+        hasCephalicFinInjury, hasBentPectoralOrTruncationInjury,
+        hasFishingLineInjury, ibDots, pattern,
+        injury, fullRow, source
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        species = excluded.species,
+        sex = excluded.sex,
+        pigmentation = excluded.pigmentation,
+        notes = excluded.notes,
+        hasCephalicFinInjury = excluded.hasCephalicFinInjury,
+        hasBentPectoralOrTruncationInjury = excluded.hasBentPectoralOrTruncationInjury,
+        hasFishingLineInjury = excluded.hasFishingLineInjury,
+        ibDots = excluded.ibDots,
+        pattern = excluded.pattern,
+        injury = excluded.injury,
+        fullRow = excluded.fullRow,
+        source = excluded.source;`,
+      [
+        id,
+        species,
+        sex,
+        pigmentation,
+        notes,
+        hasCephalicFinInjury,
+        hasBentPectoralOrTruncationInjury,
+        hasFishingLineInjury,
+        ibDots,
+        pattern,
+        injury,
+        data,
+        'remote',
+      ],
+      error => {
+        if (error) console.log('Error upserting', error);
+      },
+    );
   });
 
   win.webContents.send('sync-status', 'Pulled ' + rows.length + ' rows');
