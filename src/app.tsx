@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+
 import useIpcRendererCallback from './hooks/useIpcRenderer';
 import type { Manta } from './manta';
+import MantaRows from './manta';
 
 function Homepage() {
   const [mantaRows, setMantaRows] = useState<Manta[]>([]);
@@ -13,6 +15,8 @@ function Homepage() {
   useIpcRendererCallback('sync-complete', syncStatusCallback);
 
   useEffect(() => {
+    window.electron.ipcRenderer.invoke('db-getMantas').then(setMantaRows);
+
     function updateOnlineStatus() {
       window.electron.ipcRenderer.send(
         'online-status-changed',
@@ -41,33 +45,8 @@ function Homepage() {
       <p>
         Status: <span id="status">{navigator.onLine ? 'Online' : 'Offline'}</span>
       </p>
-      <h1 className="font-bold text-2xl underline text-red-700">Hello react in electron</h1>
-      <h1>Homepage</h1>
-      <div className="overflow-auto">
-        <table className="border-collapse border border-gray-300 w-full">
-          <thead>
-            <tr>
-              {headers.map(key => (
-                <th key={key} className="border border-gray-300 px-2 py-1 text-left">
-                  {key}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {mantaRows.map(manta => (
-              <tr key={manta.id}>
-                {headers.map((key, index) => (
-                  <td key={key} className="border border-gray-300 px-2 py-1">
-                    {manta[key]}
-                    {index === 0 && <img src={`static://images/${manta.id}.jpg`} />}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <h1 className="font-bold text-2xl underline text-red-700">Mantas!</h1>
+      <MantaRows mantas={mantaRows} />
       <button
         onClick={() => {
           const row = ['LocalRow', new Date().toISOString()];
