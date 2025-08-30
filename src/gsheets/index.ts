@@ -84,7 +84,7 @@ export async function pullFromSheets(win: BrowserWindow, db: Database) {
     );
   });
 
-  win.webContents.send('sync-status', `Pulled ${rows.length} rows`);
+  win.webContents.send('sync-complete', `Pulled ${rows.length} rows`);
 }
 
 export async function pushToSheets(win: BrowserWindow, db: Database) {
@@ -105,5 +105,5 @@ export async function pushToSheets(win: BrowserWindow, db: Database) {
   const stmt2 = db.prepare("UPDATE mantas SET source = 'remote' WHERE id = ?");
   rows.forEach(r => stmt2.run(r.id));
 
-  win.webContents.send('sync-status', `Pushed ${rows.length} rows`);
+  win.webContents.send('sync-complete', `Pushed ${rows.length} rows`);
 }
