@@ -2,7 +2,7 @@
   "name": "gex-manta",
   "productName": "gex-manta",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "GEX Manta!",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
@@ -16,7 +16,7 @@
     "name": "TheMythologist",
     "email": "leekaixuan2001@gmail.com"
   },
-  "license": "MIT",
+  "packageManager": "pnpm@10.15.1",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",

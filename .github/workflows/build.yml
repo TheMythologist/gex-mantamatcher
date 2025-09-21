@@ -1,0 +1,40 @@
+name: Build
+
+on: push
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node LTS ✨
+        uses: actions/setup-node@v5
+        with:
+          cache: pnpm
+
+      - name: Installing dependencies 📦️
+        run: pnpm install --frozen-lockfile
+
+      - name: Reconstruct Google service account file
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT }}" | base64 -d > service-account.json
+        shell: bash
+
+      - name: Build Electron app
+        run: pnpm run make
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: GEX Manta
+          path: out/make/**/*
