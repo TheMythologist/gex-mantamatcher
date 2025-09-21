@@ -58,25 +58,17 @@ export default function RootPage() {
       >
         NEW MANTA SIGHTING - Select your image!
       </button>
+
       {selectedMantaImage && (
-        <>
-          <img src={imageSrc} alt="Selected manta" className="max-w-xs rounded-lg shadow" />
-        </>
+        <img
+          src={imageSrc}
+          alt="Selected manta image"
+          className="h-60 max-w-md w-auto rounded-lg shadow object-contain"
+        />
       )}
 
       <MantaFilter filters={filters} setFilters={setFilters} />
-
-      {/* <Link to="/search">Search me!</Link> */}
-
       <MantaRows mantas={mantaRows} />
-      {/* <button
-        onClick={() => {
-          const row = ['LocalRow', new Date().toISOString()];
-          window.electron.ipcRenderer.send('add-local-row', row);
-        }}
-      >
-        Add Local Row
-      </button> */}
     </div>
   );
 }

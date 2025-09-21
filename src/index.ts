@@ -55,15 +55,6 @@ app.whenReady().then(() => {
     if (status === 'online') sync(mainWindow);
   });
 
-  ipcMain.handle('add-local-row', (event, rowData) => {
-    const id = 'local-' + Date.now();
-    const data = JSON.stringify(rowData);
-
-    // TODO: Bogus data
-    const stmt = db.prepare('INSERT INTO mantas (id, data, source) VALUES (?, ?, ?)');
-    stmt.run(id, data, 'local');
-  });
-
   ipcMain.handle('db-getManta', (event, id: string) => getManta(id));
   ipcMain.handle('db-getMantas', (event, filters: MantaFilterType) => getMantas(filters));
   ipcMain.handle('db-searchMantas', (event, searchTerm: string) => searchMantas(searchTerm));

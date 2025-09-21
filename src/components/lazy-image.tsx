@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { cn } from '../utils';
 
 interface LazyImageProps {
   src: string;
@@ -35,7 +36,11 @@ export default function LazyImage({ src, alt, className }: LazyImageProps) {
         <img
           src={src}
           alt={alt}
-          className={`${className} transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={cn(
+            'transition-opacity duration-200',
+            isLoaded ? 'opacity-100' : 'opacity-0',
+            className,
+          )}
           onLoad={() => setIsLoaded(true)}
         />
       ) : (
