@@ -17,6 +17,7 @@
     "email": "leekaixuan2001@gmail.com"
   },
   "packageManager": "pnpm@10.15.1",
+  "license": "AGPL-3.0-only",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",
