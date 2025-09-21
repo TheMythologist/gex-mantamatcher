@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react';
+import { memo, type Dispatch, type SetStateAction } from 'react';
 
 import {
   Select,
@@ -20,16 +20,17 @@ export interface MantaFilterType {
   patchType: string;
   searchNotes: string;
 }
+// TODO: Integrate miscellaneous filters such as AP (ArmPit) and I (Island)
 
 interface MantaFilterProps {
   filters: Partial<MantaFilterType>;
   setFilters: Dispatch<SetStateAction<Partial<MantaFilterType>>>;
 }
 
-export default function MantaFilter({ filters, setFilters }: MantaFilterProps) {
+export default memo(function MantaFilter({ filters, setFilters }: MantaFilterProps) {
   return (
     <div>
-      <div>Choose your filters!</div>
+      <div>Select your filters!</div>
       <div className="flex gap-1">
         <div className="flex flex-col gap-1">
           <Select
@@ -65,6 +66,7 @@ export default function MantaFilter({ filters, setFilters }: MantaFilterProps) {
             </SelectContent>
           </Select>
 
+          {/* TODO: Reset other filters that are affected by L or M */}
           <Input
             type="number"
             placeholder="Number of spots"
@@ -167,4 +169,4 @@ export default function MantaFilter({ filters, setFilters }: MantaFilterProps) {
       </div>
     </div>
   );
-}
+});
