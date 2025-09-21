@@ -33,8 +33,23 @@ jobs:
       - name: Build Electron app
         run: pnpm run make
 
-      - name: Upload artifacts
+      - name: Upload Linux Artifact
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: GEX Manta
+          name: app-linux
+          path: out/make/**/*
+
+      - name: Upload Windows Artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-windows
+          path: out/make/**/*
+
+      - name: Upload macOS Artifact
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-macos
           path: out/make/**/*
