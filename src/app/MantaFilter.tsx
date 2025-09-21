@@ -11,6 +11,7 @@ import {
 import { Input } from '../components/shadcn/Input';
 
 export interface MantaFilterType {
+  species: string;
   sex: string;
   pigmentation: string;
   dotNumber: number;
@@ -33,6 +34,21 @@ export default memo(function MantaFilter({ filters, setFilters }: MantaFilterPro
       <div>Select your filters!</div>
       <div className="flex gap-1">
         <div className="flex flex-col gap-1">
+          <Select
+            value={filters.species}
+            onValueChange={value => setFilters(prev => ({ ...prev, species: value }))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select species" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="Alfredi">Alfredi</SelectItem>
+                <SelectItem value="Birostris">Birostris</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
           <Select
             value={filters.sex}
             onValueChange={value => setFilters(prev => ({ ...prev, sex: value }))}

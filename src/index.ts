@@ -57,7 +57,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle('db-getManta', (event, id: string) => getManta(id));
   ipcMain.handle('db-getMantas', (event, filters: MantaFilterType) => getMantas(filters));
-  ipcMain.handle('db-searchMantas', (event, searchTerm: string) => searchMantas(searchTerm));
+  // ipcMain.handle('db-searchMantas', (event, searchTerm: string) => searchMantas(searchTerm));
   ipcMain.handle('chooseFile', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ['openFile'],

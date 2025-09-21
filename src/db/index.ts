@@ -66,6 +66,10 @@ export function getMantas(filter?: MantaFilterType) {
   const conditions: string[] = [];
   const values: (string | number)[] = [];
 
+  if (filter?.species) {
+    conditions.push('species = ?');
+    values.push(filter.species);
+  }
   if (filter?.sex && filter.sex !== 'U') {
     conditions.push('sex = ?');
     values.push(filter.sex);
@@ -110,10 +114,6 @@ export function getMantas(filter?: MantaFilterType) {
 
   const stmt = db.prepare(sql);
   return stmt.all(...values);
-}
-
-export function filterMantas() {
-  return 1;
 }
 
 export function searchMantas(searchTerm: string) {
