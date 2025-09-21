@@ -1,5 +1,5 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 import LazyImage from '../components/lazy-image';
 import TextWithTooltip from '../components/text-with-tooltip';
 
@@ -13,7 +13,7 @@ export type Manta = {
   [key: string]: string;
 };
 
-export default function MantaRows({ mantas }: { mantas: Manta[] }) {
+export default memo(function MantaRows({ mantas }: { mantas: Manta[] }) {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
@@ -135,4 +135,4 @@ export default function MantaRows({ mantas }: { mantas: Manta[] }) {
       </div>
     </div>
   );
-}
+});
